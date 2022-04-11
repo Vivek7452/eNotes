@@ -1,61 +1,67 @@
-<?php  
-// INSERT INTO `notes` (`sno`, `title`, `description`, `tstamp`) VALUES (NULL, 'But Books', 'Please buy books from Store', current_timestamp());
+<?php
+session_start();
+
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
+    header('location: login.php');
+    exit();
+}
+?>
+
+<?php
 $insert = false;
 $update = false;
 $delete = false;
-// Connect to the Database 
-$servername = "localhost";
-$username = "root";
-$password = "";
-$database = "notes";
+// Connect to the Database
+$servername = 'localhost';
+$username = 'root';
+$password = '';
+$database = 'notes';
 
 // Create a connection
 $conn = mysqli_connect($servername, $username, $password, $database);
 
 // Die if connection was not successful
-if (!$conn){
-    die("Sorry we failed to connect: ". mysqli_connect_error());
+if (!$conn) {
+    die('Sorry we failed to connect: ' . mysqli_connect_error());
 }
 
-if(isset($_GET['delete'])){
-  $sno = $_GET['delete'];
-  $delete = true;
-  $sql = "DELETE FROM `notes` WHERE `sno` = $sno";
-  $result = mysqli_query($conn, $sql);
+if (isset($_GET['delete'])) {
+    $sno = $_GET['delete'];
+    $delete = true;
+    $sql = "DELETE FROM `notes` WHERE `sno` = $sno";
+    $result = mysqli_query($conn, $sql);
 }
-if ($_SERVER['REQUEST_METHOD'] == 'POST'){
-if (isset( $_POST['snoEdit'])){
-  // Update the record
-    $sno = $_POST["snoEdit"];
-    $title = $_POST["titleEdit"];
-    $description = $_POST["descriptionEdit"];
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    if (isset($_POST['snoEdit'])) {
+        // Update the record
+        $sno = $_POST['snoEdit'];
+        $title = $_POST['titleEdit'];
+        $description = $_POST['descriptionEdit'];
 
-  // Sql query to be executed
-  $sql = "UPDATE `notes` SET `title` = '$title' , `description` = '$description' WHERE `notes`.`sno` = $sno";
-  $result = mysqli_query($conn, $sql);
-  if($result){
-    $update = true;
-}
-else{
-    echo "We could not update the record successfully";
-}
-}
-else{
-    $title = $_POST["title"];
-    $description = $_POST["description"];
+        // Sql query to be executed
+        $sql = "UPDATE `notes` SET `title` = '$title' , `description` = '$description' WHERE `notes`.`sno` = $sno";
+        $result = mysqli_query($conn, $sql);
+        if ($result) {
+            $update = true;
+        } else {
+            echo 'We could not update the record successfully';
+        }
+    } else {
+        $title = $_POST['title'];
+        $description = $_POST['description'];
+        
+       
+        // Sql query to be executed
+        $sql = "INSERT INTO `notes` (`title`, `description`) VALUES ('$title', '$description')";
+        $result = mysqli_query($conn, $sql);
 
-  // Sql query to be executed
-  $sql = "INSERT INTO `notes` (`title`, `description`) VALUES ('$title', '$description')";
-  $result = mysqli_query($conn, $sql);
-
-   
-  if($result){ 
-      $insert = true;
-  }
-  else{
-      echo "The record was not inserted successfully because of this error ---> ". mysqli_error($conn);
-  } 
-}
+        if ($result) {
+            $insert = true;
+        } else {
+            echo 'The record was not inserted successfully because of this error ---> ' .
+                mysqli_error($conn);
+        }
+    }
 }
 ?>
 
@@ -127,6 +133,7 @@ section{
             <span aria-hidden="true">×</span>
           </button>
         </div>
+        
         <form action="/crud/index.php" method="POST">
           <div class="modal-body">
             <input type="hidden" name="snoEdit" id="snoEdit">
@@ -149,7 +156,7 @@ section{
     </div>
   </div>
 
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <!-- <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <a class="navbar-brand" href="#"><img src="/crud/logo.svg" height="28px" alt=""></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -174,41 +181,42 @@ section{
         <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
       </form>
     </div>
-  </nav>
+  </nav> -->
+  <?php require 'partials/_nav.php'; ?>
 
-  <?php
-  if($insert){
-    echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>
+  <?php if ($insert) {
+      echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>
     <strong>Success!</strong> Your note has been inserted successfully
     <button type='button' class='close' data-dismiss='alert' aria-label='Close'>
       <span aria-hidden='true'>×</span>
     </button>
   </div>";
-  }
-  ?>
-  <?php
-  if($delete){
-    echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>
+  } ?>
+  <?php if ($delete) {
+      echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>
     <strong>Success!</strong> Your note has been deleted successfully
     <button type='button' class='close' data-dismiss='alert' aria-label='Close'>
       <span aria-hidden='true'>×</span>
     </button>
   </div>";
-  }
-  ?>
-  <?php
-  if($update){
-    echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>
+  } ?>
+  <?php if ($update) {
+      echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>
     <strong>Success!</strong> Your note has been updated successfully
     <button type='button' class='close' data-dismiss='alert' aria-label='Close'>
       <span aria-hidden='true'>×</span>
     </button>
   </div>";
-  }
-  ?>
+  } ?>
+
   <div class="container my-4">
     <h2>Add your Logic to eNotes</h2>
     <form action="/crud/index.php" method="POST">
+    <!-- <div class="form-group">
+        <label for="no">Problem number</label>
+        <input type="number" class="form-control" id="no" name="no" aria-describedby="emailHelp">
+      </div>  -->
+
       <div class="form-group">
         <label for="title">Problem Title</label>
         <input type="text" class="form-control" id="title" name="title" aria-describedby="emailHelp">
@@ -218,6 +226,7 @@ section{
         <label for="desc">Problem Logic</label>
         <textarea class="form-control" id="description" name="description" rows="3"></textarea>
       </div>
+      
       <button type="submit" class="btn btn-primary">Add Logic</button>
     </form>
   </div>
@@ -235,20 +244,30 @@ section{
         </tr>
       </thead>
       <tbody>
-        <?php 
-          $sql = "SELECT * FROM `notes`";
-          $result = mysqli_query($conn, $sql);
-          $sno = 0;
-          while($row = mysqli_fetch_assoc($result)){
+        <?php
+        $sql = 'SELECT * FROM `notes`';
+        $result = mysqli_query($conn, $sql);
+        $sno = 0;
+        while ($row = mysqli_fetch_assoc($result)) {
             $sno = $sno + 1;
             echo "<tr>
-            <th scope='row'>". $sno . "</th>
-            <td>". $row['title'] . "</td>
-            <td>". $row['description'] . "</td>
-            <td> <button class='edit btn btn-sm btn-primary' id=".$row['sno'].">Edit</button> <button class='delete btn btn-sm btn-primary' id=d".$row['sno'].">Delete</button>  </td>
+            <th scope='row'>" .
+                $sno .
+                "</th>
+            <td>" .
+                $row['title'] .
+                "</td>
+            <td>" .
+                $row['description'] .
+                "</td>
+            <td> <button class='edit btn btn-sm btn-primary' id=" .
+                $row['sno'] .
+                ">Edit</button> <button class='delete btn btn-sm btn-primary' id=d" .
+                $row['sno'] .
+                ">Delete</button>  </td>
           </tr>";
-        } 
-          ?>
+        }
+        ?>
 
 
       </tbody>
